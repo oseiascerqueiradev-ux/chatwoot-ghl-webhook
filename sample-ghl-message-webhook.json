@@ -1,0 +1,18 @@
+{
+  "event": "message.received",
+  "contactId": "ghl_contact_123",
+  "conversationId": "ghl_conversation_123",
+  "messageId": "ghl_message_123",
+  "fullName": "Cliente Teste",
+  "phone": "+5571997291654",
+  "email": "cliente@example.com",
+  "direction": "incoming",
+  "message": "Ola, quero fazer um orcamento.",
+  "attachments": [
+    {
+      "type": "image/jpeg",
+      "name": "referencia.jpg",
+      "url": "https://example.com/referencia.jpg"
+    }
+  ]
+}

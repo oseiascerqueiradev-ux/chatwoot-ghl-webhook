@@ -1,0 +1,57 @@
+services:
+  - type: web
+    name: chatwoot-ghl-webhook
+    runtime: node
+    plan: free
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: PORT
+        value: 3000
+      - key: LOG_LEVEL
+        value: info
+      - key: CHATWOOT_BASE_URL
+        sync: false
+      - key: CHATWOOT_API_TOKEN
+        sync: false
+      - key: CHATWOOT_ACCOUNT_ID
+        sync: false
+      - key: CHATWOOT_WEBHOOK_SECRET
+        sync: false
+      - key: CHATWOOT_GHL_INBOX_ID
+        value: 109302
+      - key: GHL_TO_CHATWOOT_WEBHOOK_SECRET
+        sync: false
+      - key: ENABLE_CHATWOOT_TO_GHL_REPLY_SYNC
+        value: "true"
+      - key: GHL_OUTBOUND_MESSAGE_TYPE
+        value: WhatsApp
+      - key: GHL_PRIVATE_INTEGRATION_TOKEN
+        sync: false
+      - key: GHL_API_KEY
+        sync: false
+      - key: GHL_LOCATION_ID
+        sync: false
+      - key: ENABLE_GHL_OPPORTUNITY_SYNC
+        value: "false"
+      - key: GHL_OPPORTUNITY_PIPELINE_ID
+        sync: false
+      - key: GHL_OPPORTUNITY_STAGE_ID
+        sync: false
+      - key: GHL_OPPORTUNITY_STAGE_ID_OPEN
+        sync: false
+      - key: GHL_OPPORTUNITY_STAGE_ID_PENDING
+        sync: false
+      - key: GHL_OPPORTUNITY_STAGE_ID_RESOLVED
+        sync: false
+      - key: ISA_STOP_WEBHOOK_URL
+        sync: false
+      - key: ISA_START_WEBHOOK_URL
+        sync: false
+      - key: ISA_STOP_LABELS
+        value: Stop Isa,stop-isa,stop_isa
+      - key: ISA_START_LABELS
+        value: Star Isa,Start Isa,star-isa,start-isa,star_isa,start_isa

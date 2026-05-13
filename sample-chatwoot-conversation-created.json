@@ -1,0 +1,26 @@
+{
+  "event": "conversation_created",
+  "id": 98765,
+  "account": {
+    "id": 123
+  },
+  "channel": "Channel::Api",
+  "contact": {
+    "id": 456,
+    "name": "Maria Silva",
+    "email": "maria@example.com",
+    "phone_number": "+5511999999999"
+  },
+  "meta": {
+    "sender": {
+      "id": 456,
+      "name": "Maria Silva",
+      "email": "maria@example.com",
+      "phone_number": "+5511999999999"
+    }
+  },
+  "labels": [
+    "lead",
+    "site"
+  ]
+}
