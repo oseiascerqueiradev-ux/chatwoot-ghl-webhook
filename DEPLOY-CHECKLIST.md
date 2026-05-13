@@ -6,6 +6,7 @@
 - `CHATWOOT_GHL_INBOX_ID`: `109302`
 - Conta Chatwoot: `160070`
 - Location GHL: `C8d1LN8IL9XdN9kDkaF9`
+- Render URL: `https://chatwoot-ghl-webhook.onrender.com`
 
 ## 1. Publicar o projeto no Render
 
@@ -49,7 +50,7 @@ ISA_START_LABELS=Star Isa,Start Isa,star-isa,start-isa,star_isa,start_isa
 Depois do deploy, abra:
 
 ```text
-https://SEU-SERVICO.onrender.com/health
+https://chatwoot-ghl-webhook.onrender.com/health
 ```
 
 Confirme:
@@ -72,7 +73,7 @@ Action:
 
 - `Webhook`
 - Method: `POST`
-- URL: `https://SEU-SERVICO.onrender.com/webhook/ghl`
+- URL: `https://chatwoot-ghl-webhook.onrender.com/webhook/ghl`
 - Header: `Content-Type: application/json`
 - Header: `x-ghl-webhook-secret: mesmo valor de GHL_TO_CHATWOOT_WEBHOOK_SECRET`
 
@@ -136,7 +137,7 @@ ISA_START_WEBHOOK_URL=
 No Chatwoot, configure webhook para:
 
 ```text
-https://SEU-SERVICO.onrender.com/webhook/chatwoot
+https://chatwoot-ghl-webhook.onrender.com/webhook/chatwoot
 ```
 
 Eventos:
