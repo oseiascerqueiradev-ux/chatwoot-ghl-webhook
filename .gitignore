@@ -9,3 +9,5 @@ yarn-error.log*
 .DS_Store
 dist/
 coverage/
+screen-*.png
+.ghl_*_webhook_url.tmp

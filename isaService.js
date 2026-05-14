@@ -85,10 +85,10 @@ export async function syncIsaFromLabels({
 
   const webhookUrl = getActionWebhookUrl(action);
   if (!webhookUrl) {
-    logger.warn("Etiqueta da Isa detectada, mas webhook da acao nao esta configurado", {
+    logger.info("Etiqueta da Isa detectada; usando tags do GHL para acionar workflow", {
       conversationId,
       action,
-      requiredEnv: action === "stop" ? "ISA_STOP_WEBHOOK_URL" : "ISA_START_WEBHOOK_URL",
+      optionalEnv: action === "stop" ? "ISA_STOP_WEBHOOK_URL" : "ISA_START_WEBHOOK_URL",
     });
     return null;
   }

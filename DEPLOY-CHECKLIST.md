@@ -41,8 +41,6 @@ GHL_OPPORTUNITY_STAGE_ID=
 GHL_OPPORTUNITY_STAGE_ID_OPEN=
 GHL_OPPORTUNITY_STAGE_ID_PENDING=
 GHL_OPPORTUNITY_STAGE_ID_RESOLVED=
-ISA_STOP_WEBHOOK_URL=
-ISA_START_WEBHOOK_URL=
 ISA_STOP_LABELS=Stop Isa,stop-isa,stop_isa
 ISA_START_LABELS=Star Isa,Start Isa,star-isa,start-isa,star_isa,start_isa
 ```
@@ -98,9 +96,13 @@ aberta do contato no inbox API.
 
 ## 4. Workflow Stop Isa
 
+O caminho recomendado agora e por tag, porque o Chatwoot envia a etiqueta para o servidor e o
+servidor grava a tag correspondente no contato do GHL.
+
 Trigger:
 
-- `Inbound Webhook`
+- `Contact Tag`
+- Condicao: tag adicionada `label:stop-isa`
 
 Action:
 
@@ -108,17 +110,15 @@ Action:
 - Bot: `Isa` ou `Keep Same`
 - Status: `Inactive`
 
-Depois de salvar o workflow, copie a URL do Inbound Webhook e configure:
-
-```env
-ISA_STOP_WEBHOOK_URL=
-```
+Mantenha em `Draft` ate confirmar os custos de automacao premium do GHL. Publique somente quando
+for iniciar o atendimento real.
 
 ## 5. Workflow Start Isa
 
 Trigger:
 
-- `Inbound Webhook`
+- `Contact Tag`
+- Condicao: tag adicionada `label:start-isa`
 
 Action:
 
@@ -126,11 +126,11 @@ Action:
 - Bot: `Isa` ou `Keep Same`
 - Status: `Active`
 
-Depois de salvar o workflow, copie a URL do Inbound Webhook e configure:
+Mantenha em `Draft` ate confirmar os custos de automacao premium do GHL. Publique somente quando
+for iniciar o atendimento real.
 
-```env
-ISA_START_WEBHOOK_URL=
-```
+Observacao: o codigo tambem aceita `ISA_STOP_WEBHOOK_URL` e `ISA_START_WEBHOOK_URL` se decidirmos
+voltar para Inbound Webhook depois, mas nao e mais obrigatorio para essa versao.
 
 ## 6. Webhook do Chatwoot
 
@@ -157,8 +157,8 @@ Secret:
 2. GHL chama `/webhook/ghl`.
 3. Conversa aparece no Chatwoot no inbox `GHL WhatsApp Bridge`.
 4. Atendente coloca etiqueta `Stop Isa`.
-5. Servidor chama `ISA_STOP_WEBHOOK_URL`.
+5. Servidor adiciona a tag `label:stop-isa` no contato do GHL.
 6. Atendente responde no Chatwoot.
 7. Servidor envia a resposta para o GHL/WhatsApp.
 8. Atendente coloca etiqueta `Start Isa` ou `Star Isa`.
-9. Servidor chama `ISA_START_WEBHOOK_URL`.
+9. Servidor adiciona a tag `label:start-isa` no contato do GHL.
