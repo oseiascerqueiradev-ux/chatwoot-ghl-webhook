@@ -56,6 +56,7 @@ export function getPublicConfig() {
     chatwootAccountId: process.env.CHATWOOT_ACCOUNT_ID,
     chatwootGhlInboxId: process.env.CHATWOOT_GHL_INBOX_ID || null,
     hasWebhookSecret: !isBlank(process.env.CHATWOOT_WEBHOOK_SECRET),
+    chatwootSignatureMode: process.env.CHATWOOT_SIGNATURE_MODE || "warn",
     hasGhlToChatwootWebhookSecret: !isBlank(process.env.GHL_TO_CHATWOOT_WEBHOOK_SECRET),
     enableChatwootToGhlReplySync:
       String(process.env.ENABLE_CHATWOOT_TO_GHL_REPLY_SYNC || "").toLowerCase() === "true",

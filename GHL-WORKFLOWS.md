@@ -15,7 +15,9 @@ o atendimento real e aceitar a cobranca por execucao.
 
 ## 2. Stop Isa
 
-Crie um workflow no GHL:
+Status atual: publicado em 14/05/2026.
+
+Workflow no GHL:
 
 - Nome: `Stop Isa`
 - Trigger: `Contact Tag`
@@ -29,7 +31,9 @@ o webhook do Chatwoot e adiciona a tag `label:stop-isa` no contato do GHL.
 
 ## 3. Start Isa
 
-Crie um workflow no GHL:
+Status atual: publicado em 14/05/2026.
+
+Workflow no GHL:
 
 - Nome: `Start Isa`
 - Trigger: `Contact Tag`

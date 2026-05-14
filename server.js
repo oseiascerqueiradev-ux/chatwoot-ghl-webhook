@@ -35,8 +35,14 @@ app.use((req, res, next) => {
   const isValid = verifySignature(req.rawBody, timestamp, signature, secret);
 
   if (!isValid) {
-    logger.warn("Webhook rejeitado por assinatura invalida");
-    return res.sendStatus(401);
+    const signatureMode = String(process.env.CHATWOOT_SIGNATURE_MODE || "warn").toLowerCase();
+    logger.warn("Webhook do Chatwoot com assinatura invalida", {
+      signatureMode,
+    });
+
+    if (signatureMode === "enforce") {
+      return res.sendStatus(401);
+    }
   }
 
   next();
@@ -62,6 +68,7 @@ app.get("/health", (req, res) => {
       chatwootAccountId: config.chatwootAccountId,
       chatwootGhlInboxId: config.chatwootGhlInboxId,
       hasWebhookSecret: config.hasWebhookSecret,
+      chatwootSignatureMode: config.chatwootSignatureMode,
       hasGhlToChatwootWebhookSecret: config.hasGhlToChatwootWebhookSecret,
       enableChatwootToGhlReplySync: config.enableChatwootToGhlReplySync,
       hasGhlAccessToken: config.hasGhlAccessToken,
@@ -84,6 +91,7 @@ app.listen(config.port, () => {
     chatwootAccountId: config.chatwootAccountId,
     chatwootGhlInboxId: config.chatwootGhlInboxId,
     hasWebhookSecret: config.hasWebhookSecret,
+    chatwootSignatureMode: config.chatwootSignatureMode,
     hasGhlToChatwootWebhookSecret: config.hasGhlToChatwootWebhookSecret,
     enableChatwootToGhlReplySync: config.enableChatwootToGhlReplySync,
     ghlAuthMode: config.ghlAuthMode,

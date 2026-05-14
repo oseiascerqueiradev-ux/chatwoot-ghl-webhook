@@ -29,6 +29,7 @@ CHATWOOT_BASE_URL=https://app.chatwoot.com
 CHATWOOT_API_TOKEN=
 CHATWOOT_ACCOUNT_ID=160070
 CHATWOOT_WEBHOOK_SECRET=
+CHATWOOT_SIGNATURE_MODE=warn
 CHATWOOT_GHL_INBOX_ID=109302
 GHL_TO_CHATWOOT_WEBHOOK_SECRET=
 ENABLE_CHATWOOT_TO_GHL_REPLY_SYNC=true
@@ -57,6 +58,8 @@ Confirme:
 - `chatwootGhlInboxId: "109302"`
 - `hasGhlToChatwootWebhookSecret: true`
 - `enableChatwootToGhlReplySync: true`
+- `chatwootSignatureMode: "warn"` enquanto o segredo do webhook nao estiver alinhado; use
+  `"enforce"` depois que Render e Chatwoot estiverem com o mesmo `CHATWOOT_WEBHOOK_SECRET`.
 
 ## 3. Workflow GHL -> Chatwoot
 
@@ -99,6 +102,8 @@ aberta do contato no inbox API.
 O caminho recomendado agora e por tag, porque o Chatwoot envia a etiqueta para o servidor e o
 servidor grava a tag correspondente no contato do GHL.
 
+Status atual: publicado em 14/05/2026.
+
 Trigger:
 
 - `Contact Tag`
@@ -110,10 +115,12 @@ Action:
 - Bot: `Isa` ou `Keep Same`
 - Status: `Inactive`
 
-Mantenha em `Draft` ate confirmar os custos de automacao premium do GHL. Publique somente quando
-for iniciar o atendimento real.
+Esse fluxo ja esta publicado. Se precisar interromper a automacao temporariamente, volte o status do
+workflow para `Draft`.
 
 ## 5. Workflow Start Isa
+
+Status atual: publicado em 14/05/2026.
 
 Trigger:
 
@@ -126,8 +133,8 @@ Action:
 - Bot: `Isa` ou `Keep Same`
 - Status: `Active`
 
-Mantenha em `Draft` ate confirmar os custos de automacao premium do GHL. Publique somente quando
-for iniciar o atendimento real.
+Esse fluxo ja esta publicado. Se precisar interromper a automacao temporariamente, volte o status do
+workflow para `Draft`.
 
 Observacao: o codigo tambem aceita `ISA_STOP_WEBHOOK_URL` e `ISA_START_WEBHOOK_URL` se decidirmos
 voltar para Inbound Webhook depois, mas nao e mais obrigatorio para essa versao.
