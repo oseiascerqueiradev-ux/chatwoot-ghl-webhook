@@ -12,10 +12,19 @@ import {
 } from "./ghlToChatwootDedupStore.js";
 import { logger } from "./logger.js";
 
+function isMeaningfulValue(value) {
+  if (value == null || typeof value === "object") {
+    return false;
+  }
+
+  const normalized = String(value).trim().toLowerCase();
+  return normalized !== "" && normalized !== "null" && normalized !== "undefined";
+}
+
 function pick(body, paths) {
   for (const path of paths) {
     const value = path.split(".").reduce((current, key) => current?.[key], body);
-    if (value != null && typeof value !== "object" && String(value).trim() !== "") {
+    if (isMeaningfulValue(value)) {
       return value;
     }
   }
@@ -81,7 +90,7 @@ function normalizeMedia(body) {
         name: item.name || item.fileName || item.file_name || null,
       };
     })
-    .filter((item) => item.url);
+    .filter((item) => isMeaningfulValue(item.url));
 }
 
 function normalizeMediaInput(value) {
@@ -95,7 +104,7 @@ function normalizeMediaInput(value) {
 
   if (typeof value === "string") {
     const trimmed = value.trim();
-    if (!trimmed) {
+    if (!isMeaningfulValue(trimmed)) {
       return [];
     }
 
@@ -177,6 +186,7 @@ function normalizePayload(body) {
     media,
     messageType: normalizeDirection(body),
     raw: body,
+    hasRenderableContent: Boolean(rawContent || media.length),
   };
 }
 
@@ -321,6 +331,16 @@ export default async function ghlWebhookHandler(req, res) {
       messageId: payload.messageId,
       messageType: payload.messageType,
     });
+
+    if (!payload.hasRenderableContent) {
+      logger.info("Webhook GHL -> Chatwoot ignorado sem mensagem ou midia utilizavel", {
+        event: payload.event,
+        contactId: payload.contactId,
+        conversationId: payload.conversationId,
+        messageId: payload.messageId,
+      });
+      return res.status(202).json({ ok: false, reason: "empty_message" });
+    }
 
     if (hasProcessedGhlToChatwoot(dedupKey)) {
       logger.info("Webhook GHL -> Chatwoot duplicado ignorado", {
