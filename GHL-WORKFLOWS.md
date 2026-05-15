@@ -2,7 +2,7 @@
 
 ## 1. GHL -> Chatwoot Bridge
 
-Status atual: criado em rascunho como `WhatsApp Reply to Chatwoot`.
+Status atual: publicado em 15/05/2026 como `WhatsApp Reply to Chatwoot`.
 
 Esse workflow recebe uma resposta do cliente no WhatsApp/GHL e envia a mensagem para:
 
@@ -10,8 +10,7 @@ Esse workflow recebe uma resposta do cliente no WhatsApp/GHL e envia a mensagem 
 https://chatwoot-ghl-webhook.onrender.com/webhook/ghl
 ```
 
-Mantenha em rascunho enquanto o GHL mostrar aviso de acao premium. Publique apenas quando for iniciar
-o atendimento real e aceitar a cobranca por execucao.
+Como usa acao premium de webhook, acompanhe as execucoes no GHL durante os primeiros atendimentos.
 
 ## 2. Stop Isa
 
