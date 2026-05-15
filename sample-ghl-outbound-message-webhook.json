@@ -1,0 +1,17 @@
+{
+  "type": "OutboundMessage",
+  "locationId": "C8d1LN8IL9XdN9kDkaF9",
+  "attachments": [],
+  "body": "Mensagem enviada dentro do GHL para aparecer no Chatwoot.",
+  "contactId": "test-contact-ghl-outbound",
+  "contentType": "text/plain",
+  "conversationId": "test-conversation-ghl-outbound",
+  "dateAdded": "2026-05-15T21:30:00.000Z",
+  "direction": "outbound",
+  "messageType": "WhatsApp",
+  "source": "app",
+  "status": "delivered",
+  "messageId": "test-message-ghl-outbound",
+  "from": "+5571997291654",
+  "to": "+5571999999996"
+}

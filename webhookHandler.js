@@ -212,6 +212,10 @@ function shouldSyncChatwootReplyToGhl({ event, inboxId, message }) {
     return false;
   }
 
+  if (message?.content_attributes?.origem === "ghl") {
+    return false;
+  }
+
   if (String(process.env.ENABLE_CHATWOOT_TO_GHL_REPLY_SYNC || "").toLowerCase() !== "true") {
     return false;
   }
