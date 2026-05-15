@@ -194,15 +194,23 @@ function isAuthorized(req) {
 }
 
 function extractContactId(result) {
-  return result?.id || result?.payload?.id || result?.payload?.[0]?.id || result?.contact?.id || null;
+  return (
+    result?.id ||
+    result?.payload?.id ||
+    result?.payload?.contact?.id ||
+    result?.payload?.[0]?.id ||
+    result?.contact?.id ||
+    null
+  );
 }
 
 function findSourceId(contact, inboxId) {
-  const contactInbox = (contact?.contact_inboxes || []).find(
+  const contactInboxes = contact?.contact_inboxes || contact?.payload?.contact?.contact_inboxes || [];
+  const contactInbox = contactInboxes.find(
     (item) => String(item?.inbox?.id) === String(inboxId)
   );
 
-  return contactInbox?.source_id || null;
+  return contactInbox?.source_id || contact?.payload?.contact_inbox?.source_id || null;
 }
 
 async function findOrCreateContact(accountId, payload) {

@@ -1,0 +1,23 @@
+{
+  "event": "message.received",
+  "contactId": "test-contact-media-audio",
+  "conversationId": "test-conversation-media-audio",
+  "messageId": "test-message-media-audio",
+  "fullName": "Lead Teste Midia Audio",
+  "phone": "+5571999999998",
+  "email": "teste-midia-audio@example.com",
+  "direction": "incoming",
+  "message": "Segue uma imagem e um audio de teste",
+  "attachments": [
+    {
+      "url": "https://httpbin.org/image/png",
+      "type": "image/png",
+      "name": "teste.png"
+    },
+    {
+      "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+      "type": "audio/mpeg",
+      "name": "teste-audio.mp3"
+    }
+  ]
+}
