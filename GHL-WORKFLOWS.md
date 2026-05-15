@@ -12,6 +12,11 @@ https://chatwoot-ghl-webhook.onrender.com/webhook/ghl
 
 Como usa acao premium de webhook, acompanhe as execucoes no GHL durante os primeiros atendimentos.
 
+Observacao: esse workflow cobre mensagens recebidas do cliente. Mensagens enviadas dentro do GHL
+pela Isa ou por usuario precisam ser enviadas pelo evento `OutboundMessage` do HighLevel para o mesmo
+endpoint. O servidor ja aceita `OutboundMessage` e cria a mensagem no Chatwoot como enviada, sem
+reenviar para o GHL.
+
 ## 2. Stop Isa
 
 Status atual: publicado em 14/05/2026.
