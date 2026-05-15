@@ -482,6 +482,16 @@ export default async function webhookHandler(req, res) {
 
     const webhookMessage = getWebhookMessage(body);
     const eventMessage = findMessageById(messages, messageId) || webhookMessage;
+
+    if (event === "message_created" && eventMessage?.content_attributes?.origem === "ghl") {
+      logger.info("Mensagem espelhada do GHL ignorada no fluxo Chatwoot -> GHL", {
+        conversationId,
+        messageId,
+      });
+      rememberProcessedWebhook(dedupKey);
+      return res.sendStatus(200);
+    }
+
     const sender = extractSender(details, body);
     const channel = normalizeChannel(details, body);
     const labels = normalizeLabels(details, body);
