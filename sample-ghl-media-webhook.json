@@ -1,0 +1,18 @@
+{
+  "event": "message.received",
+  "contactId": "test-contact-media",
+  "conversationId": "test-conversation-media",
+  "messageId": "test-message-media",
+  "fullName": "Lead Teste Midia",
+  "phone": "+5571999999999",
+  "email": "teste-midia@example.com",
+  "direction": "incoming",
+  "message": "Segue uma imagem de teste",
+  "attachments": [
+    {
+      "url": "https://httpbin.org/image/png",
+      "type": "image/png",
+      "name": "teste.png"
+    }
+  ]
+}

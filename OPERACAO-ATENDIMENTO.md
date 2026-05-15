@@ -38,14 +38,17 @@ pela equipe para acompanhar/intervir nas conversas.
 - Confirmar que `Start Isa` reativa a IA.
 - Confirmar comportamento de imagem/audio no Chatwoot.
 
-## Limitacao atual de midia
+## Midia no Chatwoot
 
-Enquanto o GHL envia anexos como URL no webhook, o servidor cria a mensagem no Chatwoot como texto
-com link do anexo. Isso preserva o acesso ao arquivo, mas pode nao aparecer como uma bolha nativa de
-WhatsApp com preview de imagem ou botao de play.
+Quando o GHL envia anexos como URL no webhook, o servidor tenta baixar a midia e reenviar para o
+Chatwoot como anexo real. Com isso:
 
-Para chegar no visual ideal, precisamos validar o payload real de midia do GHL e, se houver URL publica
-do arquivo, adaptar o envio para o formato de anexo aceito pela API do Chatwoot.
+- imagens devem aparecer com preview dentro da conversa;
+- audios devem aparecer com player para ouvir no Chatwoot;
+- se a URL do GHL nao estiver acessivel pelo Render, a mensagem cai para o fallback com link do anexo.
+
+Ainda precisamos validar com um payload real do GHL, porque alguns provedores enviam midia com URL
+temporaria, privada ou em campos diferentes.
 
 ## Comandos uteis
 

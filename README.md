@@ -375,7 +375,17 @@ Payload minimo recomendado:
 ```
 
 O servidor tenta reaproveitar o contato/conversa no Chatwoot usando `contactId`, telefone, email e
-`conversationId`. Se vierem anexos como URLs, eles sao adicionados ao corpo da mensagem como links.
+`conversationId`. Se vierem anexos como URLs, o servidor tenta baixar a midia e criar a mensagem no
+Chatwoot com anexo real. Assim imagens aparecem com preview e audios aparecem com player quando a URL
+do arquivo estiver acessivel pelo Render. Se o download ou upload do anexo falhar, o servidor cai para
+o modo seguro e adiciona os links no corpo da mensagem.
+
+Limites opcionais para midia:
+
+```env
+CHATWOOT_ATTACHMENT_MAX_BYTES=26214400
+CHATWOOT_ATTACHMENT_DOWNLOAD_TIMEOUT_MS=15000
+```
 
 Quando `ENABLE_CHATWOOT_TO_GHL_REPLY_SYNC=true`, respostas enviadas por atendentes dentro desse inbox
 API do Chatwoot sao reenviadas para o GHL usando os IDs salvos na conversa (`ghl_contact_id` e

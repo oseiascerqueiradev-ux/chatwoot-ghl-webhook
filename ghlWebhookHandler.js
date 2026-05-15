@@ -60,9 +60,14 @@ function normalizeDirection(body) {
 function normalizeMedia(body) {
   const values = [
     pick(body, ["mediaUrl", "media_url", "attachmentUrl", "attachment_url", "fileUrl", "file_url"]),
-    ...(Array.isArray(body.attachments) ? body.attachments : []),
-    ...(Array.isArray(body.media) ? body.media : []),
-  ].filter(Boolean);
+    body.attachments,
+    body.media,
+    body.message?.attachments,
+    body.message?.media,
+    body.message?.attachment,
+  ]
+    .flatMap((value) => normalizeMediaInput(value))
+    .filter(Boolean);
 
   return values
     .map((item) => {
@@ -77,6 +82,40 @@ function normalizeMedia(body) {
       };
     })
     .filter((item) => item.url);
+}
+
+function normalizeMediaInput(value) {
+  if (!value) {
+    return [];
+  }
+
+  if (Array.isArray(value)) {
+    return value;
+  }
+
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return [];
+    }
+
+    if (trimmed.startsWith("[") || trimmed.startsWith("{")) {
+      try {
+        const parsed = JSON.parse(trimmed);
+        return Array.isArray(parsed) ? parsed : [parsed];
+      } catch {
+        return [trimmed];
+      }
+    }
+
+    return [trimmed];
+  }
+
+  if (typeof value === "object") {
+    return [value];
+  }
+
+  return [];
 }
 
 function formatMedia(mediaItems) {
@@ -121,6 +160,8 @@ function normalizePayload(body) {
   const media = normalizeMedia(body);
   const mediaText = formatMedia(media);
   const content = [rawContent, mediaText].filter(Boolean).join("\n\n") || "[Mensagem sem texto recebida do GHL]";
+  const textContent = rawContent || "";
+  const caption = rawContent || "";
 
   return {
     event: pick(body, ["event", "type", "trigger"]) || "ghl_message",
@@ -131,6 +172,8 @@ function normalizePayload(body) {
     phone,
     email,
     content,
+    textContent,
+    caption,
     media,
     messageType: normalizeDirection(body),
     raw: body,
@@ -290,7 +333,10 @@ export default async function ghlWebhookHandler(req, res) {
 
     const message = await createChatwootMessage(accountId, conversation.id, {
       content: payload.content,
+      textContent: payload.textContent,
+      caption: payload.caption,
       messageType: payload.messageType,
+      attachments: payload.media,
       contentAttributes: {
         origem: "ghl",
         ghl_contact_id: payload.contactId || null,

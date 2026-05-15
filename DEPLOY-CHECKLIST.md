@@ -34,6 +34,8 @@ CHATWOOT_GHL_INBOX_ID=109302
 GHL_TO_CHATWOOT_WEBHOOK_SECRET=
 ENABLE_CHATWOOT_TO_GHL_REPLY_SYNC=true
 GHL_OUTBOUND_MESSAGE_TYPE=WhatsApp
+CHATWOOT_ATTACHMENT_MAX_BYTES=26214400
+CHATWOOT_ATTACHMENT_DOWNLOAD_TIMEOUT_MS=15000
 GHL_PRIVATE_INTEGRATION_TOKEN=
 GHL_LOCATION_ID=C8d1LN8IL9XdN9kDkaF9
 ENABLE_GHL_OPPORTUNITY_SYNC=true
@@ -96,6 +98,10 @@ Payload base:
 
 Se o GHL nao oferecer `{{conversation.id}}`, envie apenas `contactId`; o servidor reutiliza a conversa
 aberta do contato no inbox API.
+
+Para midias, envie URLs acessiveis pelo Render em `attachments`, `media`, `mediaUrl`, `attachmentUrl`
+ou `fileUrl`. O servidor tentara criar anexos reais no Chatwoot; se nao conseguir baixar o arquivo,
+mantem o link no corpo da mensagem.
 
 ## 4. Workflow Stop Isa
 
