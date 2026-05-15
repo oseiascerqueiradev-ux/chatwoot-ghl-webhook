@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
+    "verify:readiness": "node verifyReadiness.js",
     "test:webhook": "node sendTestWebhook.js",
     "test:ghl-webhook": "node sendTestGhlWebhook.js",
     "diagnose:conversation": "node diagnoseConversation.js"

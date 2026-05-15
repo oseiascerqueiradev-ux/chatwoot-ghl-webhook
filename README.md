@@ -128,15 +128,14 @@ O comportamento atual do sync no CRM ficou assim:
 Para evitar conflito entre atendimento humano no Chatwoot e a IA do GHL, o projeto reconhece duas
 etiquetas de controle na conversa:
 
-- `Stop Isa`: envia um webhook para pausar a IA
-- `Star Isa` ou `Start Isa`: envia um webhook para reativar a IA
+- `Stop Isa`: adiciona a tag `label:stop-isa` no contato do GHL
+- `Star Isa` ou `Start Isa`: adiciona a tag `label:start-isa` no contato do GHL
 
-Configure os endpoints no `.env`:
+No GHL, os workflows publicados escutam essas tags e usam a acao nativa **Update Conversation AI Bot
+and Status**:
 
-```env
-ISA_STOP_WEBHOOK_URL=https://seu-webhook-ghl-para-pausar-ia
-ISA_START_WEBHOOK_URL=https://seu-webhook-ghl-para-reativar-ia
-```
+- tag `label:stop-isa`: atualizar a Isa para `Inactive`
+- tag `label:start-isa`: atualizar a Isa para `Active`
 
 Opcionalmente, personalize os nomes aceitos das etiquetas:
 
@@ -145,15 +144,8 @@ ISA_STOP_LABELS=Stop Isa,stop-isa,stop_isa
 ISA_START_LABELS=Star Isa,Start Isa,star-isa,start-isa,star_isa,start_isa
 ```
 
-O payload enviado para esses webhooks inclui `action`, `conversationId`, `ghlContactId`,
-`locationId`, contato, telefone, email, status, canal, inbox, responsavel e etiquetas. A acao so e
-reenviada quando muda de estado naquela conversa, por exemplo de `stop` para `start`.
-
-No GHL, o workflow recomendado para cada webhook deve usar a acao nativa **Update Conversation AI Bot
-and Status**:
-
-- webhook de `stop`: atualizar a Isa para `Inactive`
-- webhook de `start`: atualizar a Isa para `Active`
+O codigo ainda aceita `ISA_STOP_WEBHOOK_URL` e `ISA_START_WEBHOOK_URL` como alternativa futura, mas
+isso nao e necessario no fluxo atual por tags.
 
 ## Oportunidade opcional no GHL
 
@@ -295,6 +287,12 @@ npm run test:webhook
 Por padrao ele envia para `http://localhost:3000/webhook/chatwoot` usando `sample-chatwoot-conversation-created.json`.
 
 Se quiser apontar para outra URL, defina `TEST_WEBHOOK_URL` no ambiente antes de rodar.
+
+Para revisar a prontidao sem criar contatos ou mensagens:
+
+```bash
+npm run verify:readiness
+```
 
 ## Diagnostico rapido
 

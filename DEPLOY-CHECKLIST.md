@@ -169,3 +169,15 @@ Secret:
 7. Servidor envia a resposta para o GHL/WhatsApp.
 8. Atendente coloca etiqueta `Start Isa` ou `Star Isa`.
 9. Servidor adiciona a tag `label:start-isa` no contato do GHL.
+
+## 8. Revisao sem conexao real
+
+Enquanto o plano pago/conexao final nao estiver ativo, rode:
+
+```bash
+npm run verify:readiness
+```
+
+Esse comando apenas consulta configuracoes e nao cria contatos, conversas ou mensagens.
+
+Para a rotina dos atendentes, use o guia [OPERACAO-ATENDIMENTO.md](./OPERACAO-ATENDIMENTO.md).
