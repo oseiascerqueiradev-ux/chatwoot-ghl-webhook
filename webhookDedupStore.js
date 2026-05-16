@@ -12,6 +12,14 @@ function pruneExpiredEntries() {
 }
 
 function buildKey({ deliveryId, event, conversationId, status, messageId }) {
+  if (event === "message_created" && messageId) {
+    return JSON.stringify({
+      event,
+      conversationId: conversationId || null,
+      messageId,
+    });
+  }
+
   return JSON.stringify({
     deliveryId: deliveryId || null,
     event: event || null,
