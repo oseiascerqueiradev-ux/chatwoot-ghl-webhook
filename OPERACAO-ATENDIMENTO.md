@@ -11,6 +11,7 @@ pela equipe para acompanhar/intervir nas conversas.
 - Workflow `Start Isa`: publicado no GHL
 - Workflow `WhatsApp Reply to Chatwoot`: publicado no GHL
 - Espelho de mensagens enviadas no GHL: servidor pronto para receber evento `OutboundMessage`
+- Backfill GHL -> Chatwoot: ativo para buscar mensagens recentes da conversa no GHL quando o webhook chega
 - Webhook Chatwoot -> Render: cadastrado
 - Assinatura Chatwoot: modo `warn` ate alinhar o secret entre Chatwoot e Render
 
@@ -21,6 +22,7 @@ pela equipe para acompanhar/intervir nas conversas.
 3. Quando quiser devolver o atendimento para a IA, aplique `Start Isa`.
 4. Se a IA responder junto com o humano, confirme se `Stop Isa` foi aplicado na conversa correta.
 5. Se o cliente mandar imagem ou audio e aparecer apenas como link, abra o link para visualizar/ouvir.
+6. Se uma conversa aparecer incompleta, envie/receba uma nova mensagem pelo GHL para o webhook puxar o historico recente.
 
 ## O que cada etiqueta faz
 
@@ -35,6 +37,7 @@ pela equipe para acompanhar/intervir nas conversas.
 - Fazer um teste com um numero controlado antes de atender clientes reais.
 - Confirmar que mensagem do cliente aparece no Chatwoot.
 - Confirmar que mensagem enviada pela Isa/atendente no GHL aparece no Chatwoot via `OutboundMessage`.
+- Confirmar que historico recente da conversa no GHL aparece no Chatwoot apos o primeiro webhook do contato.
 - Confirmar que resposta do atendente no Chatwoot volta para o WhatsApp/GHL.
 - Confirmar que `Stop Isa` pausa a IA.
 - Confirmar que `Start Isa` reativa a IA.

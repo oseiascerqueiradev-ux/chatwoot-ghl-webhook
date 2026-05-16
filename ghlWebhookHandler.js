@@ -3,8 +3,13 @@ import {
   createChatwootConversation,
   createChatwootMessage,
   getContactConversations,
+  getConversationMessages,
   searchChatwootContacts,
 } from "./chatwootService.js";
+import {
+  getGhlConversationMessages,
+  searchGhlConversations,
+} from "./ghlService.js";
 import {
   buildGhlToChatwootDedupKey,
   hasProcessedGhlToChatwoot,
@@ -190,6 +195,10 @@ function normalizePayload(body) {
   };
 }
 
+function shouldBackfillGhlConversation() {
+  return String(process.env.ENABLE_GHL_HISTORY_BACKFILL || "true").toLowerCase() !== "false";
+}
+
 function isAuthorized(req) {
   const secret = process.env.GHL_TO_CHATWOOT_WEBHOOK_SECRET;
   if (!secret) {
@@ -308,6 +317,189 @@ async function findOrCreateConversation(accountId, contactId, sourceId, payload)
   });
 }
 
+function normalizeGhlAttachmentInput(attachments) {
+  return normalizeMediaInput(attachments)
+    .map((item) => {
+      if (typeof item === "string") {
+        return { url: item };
+      }
+
+      return {
+        url:
+          item.url ||
+          item.mediaUrl ||
+          item.media_url ||
+          item.fileUrl ||
+          item.file_url ||
+          item.link ||
+          null,
+        type: item.type || item.contentType || item.content_type || item.mime_type || null,
+        name: item.name || item.fileName || item.file_name || null,
+      };
+    })
+    .filter((item) => isMeaningfulValue(item.url));
+}
+
+function isConversationMessage(message) {
+  const messageType = String(message?.messageType || "").toUpperCase();
+
+  if (messageType.startsWith("TYPE_ACTIVITY_")) {
+    return false;
+  }
+
+  return Boolean(message?.body || normalizeGhlAttachmentInput(message?.attachments).length);
+}
+
+function toChatwootMessageFromGhlMessage(message) {
+  const media = normalizeGhlAttachmentInput(message.attachments);
+  const rawContent = isMeaningfulValue(message.body) ? String(message.body) : "";
+  const mediaText = formatMedia(media);
+  const content = [rawContent, mediaText].filter(Boolean).join("\n\n") || "[Mensagem sem texto recebida do GHL]";
+
+  return {
+    content,
+    textContent: rawContent,
+    caption: rawContent,
+    messageType: String(message.direction || "").toLowerCase() === "outbound" ? "outgoing" : "incoming",
+    attachments: media,
+    contentAttributes: {
+      origem: "ghl",
+      sync_source: "ghl_history_backfill",
+      ghl_contact_id: message.contactId || null,
+      ghl_conversation_id: message.conversationId || null,
+      ghl_message_id: message.id || null,
+      ghl_message_type: message.messageType || null,
+      ghl_message_date: message.dateAdded || null,
+      media,
+    },
+  };
+}
+
+function getExistingGhlMessageIds(messages) {
+  return new Set(
+    messages
+      .map((message) => message?.content_attributes?.ghl_message_id)
+      .filter(Boolean)
+      .map(String)
+  );
+}
+
+function normalizeMessageText(value) {
+  return String(value || "").replace(/\s+/g, " ").trim().toLowerCase();
+}
+
+function normalizeChatwootDirection(messageType) {
+  if (messageType === 1 || String(messageType).toLowerCase() === "outgoing") {
+    return "outgoing";
+  }
+
+  return "incoming";
+}
+
+function buildContentSignature({ direction, content }) {
+  const normalizedContent = normalizeMessageText(content);
+
+  if (!normalizedContent) {
+    return null;
+  }
+
+  return `${direction}:${normalizedContent}`;
+}
+
+function getExistingContentSignatures(messages) {
+  return new Set(
+    messages
+      .map((message) =>
+        buildContentSignature({
+          direction: normalizeChatwootDirection(message?.message_type),
+          content: message?.content,
+        })
+      )
+      .filter(Boolean)
+  );
+}
+
+async function enrichPayloadWithGhlConversation(payload) {
+  if (payload.conversationId || !payload.contactId || !shouldBackfillGhlConversation()) {
+    return null;
+  }
+
+  const [conversation] = await searchGhlConversations({
+    contactId: payload.contactId,
+    phone: payload.phone,
+    email: payload.email,
+    limit: 1,
+  });
+
+  if (conversation?.id) {
+    payload.conversationId = conversation.id;
+  }
+
+  return conversation || null;
+}
+
+async function backfillGhlConversationMessages(accountId, chatwootConversationId, payload) {
+  if (!shouldBackfillGhlConversation() || !payload.conversationId) {
+    return { created: 0, createdMessageIds: [], knownMessageIds: new Set() };
+  }
+
+  const limit = Number(process.env.GHL_HISTORY_BACKFILL_LIMIT || 20);
+  const [ghlMessages, chatwootMessages] = await Promise.all([
+    getGhlConversationMessages(payload.conversationId, { limit }),
+    getConversationMessages(accountId, chatwootConversationId),
+  ]);
+  const existingIds = getExistingGhlMessageIds(chatwootMessages);
+  const existingContentSignatures = getExistingContentSignatures(chatwootMessages);
+  const createdMessageIds = [];
+  const seenBatchSignatures = new Set();
+
+  const messagesToCreate = ghlMessages
+    .filter(isConversationMessage)
+    .filter((message) => message.id && !existingIds.has(String(message.id)))
+    .filter((message) => {
+      const signature = buildContentSignature({
+        direction: String(message.direction || "").toLowerCase() === "outbound" ? "outgoing" : "incoming",
+        content: message.body,
+      });
+
+      if (!signature) {
+        return true;
+      }
+
+      if (existingContentSignatures.has(signature) || seenBatchSignatures.has(signature)) {
+        return false;
+      }
+
+      seenBatchSignatures.add(signature);
+      return true;
+    })
+    .sort((a, b) => new Date(a.dateAdded || 0).getTime() - new Date(b.dateAdded || 0).getTime())
+    .slice(-limit);
+
+  for (const ghlMessage of messagesToCreate) {
+    const chatwootMessage = toChatwootMessageFromGhlMessage(ghlMessage);
+    await createChatwootMessage(accountId, chatwootConversationId, chatwootMessage);
+    createdMessageIds.push(String(ghlMessage.id));
+    existingIds.add(String(ghlMessage.id));
+    existingContentSignatures.add(
+      buildContentSignature({
+        direction: chatwootMessage.messageType,
+        content: chatwootMessage.content,
+      })
+    );
+  }
+
+  if (createdMessageIds.length) {
+    logger.info("Historico recente do GHL sincronizado no Chatwoot", {
+      ghlConversationId: payload.conversationId,
+      chatwootConversationId,
+      created: createdMessageIds.length,
+    });
+  }
+
+  return { created: createdMessageIds.length, createdMessageIds, knownMessageIds: existingIds };
+}
+
 export default async function ghlWebhookHandler(req, res) {
   try {
     if (!isAuthorized(req)) {
@@ -322,6 +514,7 @@ export default async function ghlWebhookHandler(req, res) {
 
     const accountId = process.env.CHATWOOT_ACCOUNT_ID;
     const payload = normalizePayload(req.body || {});
+    await enrichPayloadWithGhlConversation(payload);
     const dedupKey = buildGhlToChatwootDedupKey(payload);
 
     logger.info("Webhook GHL -> Chatwoot recebido", {
@@ -332,7 +525,7 @@ export default async function ghlWebhookHandler(req, res) {
       messageType: payload.messageType,
     });
 
-    if (!payload.hasRenderableContent) {
+    if (!payload.hasRenderableContent && !payload.conversationId) {
       logger.info("Webhook GHL -> Chatwoot ignorado sem mensagem ou midia utilizavel", {
         event: payload.event,
         contactId: payload.contactId,
@@ -359,6 +552,30 @@ export default async function ghlWebhookHandler(req, res) {
       throw new Error("Nao foi possivel identificar/criar conversa no Chatwoot");
     }
 
+    const backfill = await backfillGhlConversationMessages(accountId, conversation.id, payload);
+
+    if (!payload.hasRenderableContent) {
+      return res.status(backfill.created ? 200 : 202).json({
+        ok: Boolean(backfill.created),
+        reason: backfill.created ? undefined : "empty_message",
+        contactId: contact.contactId,
+        conversationId: conversation.id,
+        backfilledMessages: backfill.created,
+      });
+    }
+
+    if (payload.messageId && backfill.knownMessageIds.has(String(payload.messageId))) {
+      rememberProcessedGhlToChatwoot(dedupKey);
+
+      return res.status(200).json({
+        ok: true,
+        contactId: contact.contactId,
+        conversationId: conversation.id,
+        messageId: payload.messageId,
+        backfilledMessages: backfill.created,
+      });
+    }
+
     const message = await createChatwootMessage(accountId, conversation.id, {
       content: payload.content,
       textContent: payload.textContent,
@@ -381,6 +598,7 @@ export default async function ghlWebhookHandler(req, res) {
       contactId: contact.contactId,
       conversationId: conversation.id,
       messageId: message?.id || null,
+      backfilledMessages: backfill.created,
     });
   } catch (error) {
     logger.error("Erro no webhook GHL -> Chatwoot", {

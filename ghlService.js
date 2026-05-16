@@ -56,6 +56,44 @@ export async function ghlSearchContacts(params = {}) {
   return Array.isArray(data?.contacts) ? data.contacts : [];
 }
 
+export async function searchGhlConversations(params = {}) {
+  const query = new URLSearchParams({
+    locationId: process.env.GHL_LOCATION_ID,
+    limit: String(params.limit || 10),
+  });
+
+  for (const key of ["contactId", "phone", "email", "query"]) {
+    if (params[key] != null && String(params[key]).trim() !== "") {
+      query.set(key, String(params[key]));
+    }
+  }
+
+  const data = await ghlFetch(`/conversations/search?${query.toString()}`, {
+    method: "GET",
+  });
+
+  return Array.isArray(data?.conversations) ? data.conversations : [];
+}
+
+export async function getGhlConversationMessages(conversationId, options = {}) {
+  const query = new URLSearchParams();
+
+  if (options.limit) {
+    query.set("limit", String(options.limit));
+  }
+
+  if (options.lastMessageId) {
+    query.set("lastMessageId", String(options.lastMessageId));
+  }
+
+  const suffix = query.toString() ? `?${query.toString()}` : "";
+  const data = await ghlFetch(`/conversations/${conversationId}/messages${suffix}`, {
+    method: "GET",
+  });
+
+  return Array.isArray(data?.messages?.messages) ? data.messages.messages : [];
+}
+
 function extractContactId(payload) {
   return (
     payload?.contact?.id ||
