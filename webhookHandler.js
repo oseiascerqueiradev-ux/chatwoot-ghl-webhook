@@ -9,7 +9,12 @@ import {
 } from "./ghlService.js";
 import { syncIsaFromLabels } from "./isaService.js";
 import { logger } from "./logger.js";
-import { hasProcessedWebhook, rememberProcessedWebhook } from "./webhookDedupStore.js";
+import {
+  claimWebhookProcessing,
+  hasProcessedWebhook,
+  releaseWebhookProcessing,
+  rememberProcessedWebhook,
+} from "./webhookDedupStore.js";
 
 function getHeader(req, name) {
   return req.headers[name] || req.headers[name.toLowerCase()];
@@ -475,6 +480,17 @@ export default async function webhookHandler(req, res) {
       return res.sendStatus(200);
     }
 
+    if (!claimWebhookProcessing(dedupKey)) {
+      logger.info("Webhook em processamento/duplicado ignorado", {
+        event,
+        deliveryId,
+        conversationId,
+        status: incomingStatus,
+        messageId,
+      });
+      return res.sendStatus(200);
+    }
+
     const [details, messages] = await Promise.all([
       getConversationDetails(accountId, conversationId),
       getConversationMessages(accountId, conversationId),
@@ -700,6 +716,20 @@ export default async function webhookHandler(req, res) {
 
     res.sendStatus(200);
   } catch (error) {
+    try {
+      if (req.body) {
+        releaseWebhookProcessing({
+          deliveryId: getHeader(req, "x-chatwoot-delivery"),
+          event: req.body.event,
+          conversationId: extractConversationId(req.body),
+          status: req.body.conversation?.status || req.body.status || null,
+          messageId: extractMessageId(req.body),
+        });
+      }
+    } catch {
+      // Mantem o tratamento de erro principal abaixo.
+    }
+
     logger.error("Erro no processamento do webhook", {
       error: error.message,
       stack: error.stack,

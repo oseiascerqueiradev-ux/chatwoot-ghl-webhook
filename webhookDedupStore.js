@@ -1,5 +1,6 @@
 const ENTRY_TTL_MS = 10 * 60 * 1000;
 const processedEvents = new Map();
+const processingEvents = new Map();
 
 function pruneExpiredEntries() {
   const now = Date.now();
@@ -7,6 +8,12 @@ function pruneExpiredEntries() {
   for (const [key, expiresAt] of processedEvents.entries()) {
     if (expiresAt <= now) {
       processedEvents.delete(key);
+    }
+  }
+
+  for (const [key, expiresAt] of processingEvents.entries()) {
+    if (expiresAt <= now) {
+      processingEvents.delete(key);
     }
   }
 }
@@ -46,7 +53,25 @@ export function hasProcessedWebhook(keyData) {
   return true;
 }
 
+export function claimWebhookProcessing(keyData) {
+  pruneExpiredEntries();
+  const key = buildKey(keyData);
+
+  if (processedEvents.has(key) || processingEvents.has(key)) {
+    return false;
+  }
+
+  processingEvents.set(key, Date.now() + ENTRY_TTL_MS);
+  return true;
+}
+
+export function releaseWebhookProcessing(keyData) {
+  processingEvents.delete(buildKey(keyData));
+}
+
 export function rememberProcessedWebhook(keyData) {
   pruneExpiredEntries();
-  processedEvents.set(buildKey(keyData), Date.now() + ENTRY_TTL_MS);
+  const key = buildKey(keyData);
+  processingEvents.delete(key);
+  processedEvents.set(key, Date.now() + ENTRY_TTL_MS);
 }
